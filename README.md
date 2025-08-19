@@ -92,9 +92,4 @@ Hallazgos consistentes entre modelos:
    cd TelecomChallenge2
 
 👩‍💻 Autora
-
-Proyecto desarrollado por Alejandra Cotroneo como parte del programa Oracle Next Education (ONE) + Alura Latam.
-
-
-👩‍💻 Autora
 Proyecto desarrollado por Alejandra Cotroneo como parte del programa Oracle Next Education (ONE) + Alura Latam.
