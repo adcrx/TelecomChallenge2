@@ -1,96 +1,122 @@
-# 📊 Challenge Telecom X – Parte 2: Predicción de Cancelación de Clientes
+# Telecom Challenge 2 – Predicción de Cancelación de Clientes (Churn)
 
-## 📖 Descripción del Proyecto
-Este proyecto corresponde a la **segunda parte** del desafío de la empresa ficticia **Telecom X** (Alura Latam – Data Science).  
-En la Parte 1 realizamos la limpieza y el análisis exploratorio del churn (cancelación).  
-En esta Parte 2 construimos y comparamos **modelos predictivos** para anticipar qué clientes tienen mayor probabilidad de cancelar.
-
----
-
-## 🎯 Objetivos
-- Preparar los datos tratados en la Parte 1 para modelado.
-- Realizar un **análisis de correlación** y un **análisis dirigido** (gráficos puntuales).
-- Entrenar y comparar **al menos dos modelos** de ML (se usaron cuatro).
-- Evaluar con **Accuracy, Precisión, Recall, F1** y **Matriz de Confusión**.
-- Analizar **importancia de variables** e interpretar resultados.
-- Proponer **estrategias de retención** basadas en los hallazgos.
+Repositorio: **TelecomChallenge2**  
+Autor: **adcrx**  
+Notebook principal: `TelecomX2.ipynb`
 
 ---
 
-## ⚙️ Preparación de Datos
-- **Fuente**: CSV tratado de la Parte 1 (con columnas corregidas y estandarizadas).
-- **Limpieza**: se removieron columnas irrelevantes (`customerID`, columnas índice auxiliares, etc.).
-- **Tipos/Nulos**: `Total` se forzó a numérico y se imputó con mediana; `Churn` sin nulos.
-- **Target**: `Churn` mapeado a **0 = No** / **1 = Yes**.
-- **Encoding**: categóricas con **OneHotEncoder** (dejando `Churn` fuera del encoding).
-- **Clase objetivo (desbalance)**: aprox. **73% No vs. 27% Sí** → **no** se aplicó balanceo (no severo).  
-  - Mitigaciones: split **estratificado** y `class_weight="balanced"` en modelos adecuados.
-- **Escalado**: aplicado **solo** en modelos sensibles a la escala (**Regresión Logística** y **KNN**).  
-  Modelos basados en árboles (**Decision Tree**, **Random Forest**) **no** lo requieren.
+## 🎯 Propósito del Proyecto
+
+El objetivo de este desafío es **predecir la cancelación (churn) de clientes** de la empresa ficticia **Telecom X**, utilizando técnicas de Machine Learning.  
+A partir de los datos tratados en la Parte 1 del challenge, buscamos identificar qué clientes tienen mayor riesgo de cancelar, qué variables influyen más en su decisión y cómo la empresa puede implementar estrategias de retención.
 
 ---
 
-## 🔍 Análisis Exploratorio Breve
-- **Correlaciones con Churn**: mayor riesgo en `InternetService_fiber optic`, `PaymentMethod_Electronic check`, y mayor `Monthly`; menor riesgo con mayor **tenure** y **contratos largos**.
-- **Análisis dirigido**:
-  - **tenure × Churn**: clientes antiguos cancelan menos.
-  - **Total × Churn**: menor gasto acumulado se asocia a más churn.
-  - **Contract × Churn**: **Month-to-month** concentra la fuga; **Two year** la reduce fuertemente.
-  - **PaymentMethod × Churn**: **Electronic check** con mayor churn.
-  - **Monthly × Churn**: cuotas mensuales altas → mayor churn.
+## 📂 Estructura del Proyecto
+
+- `TelecomX2.ipynb` → Notebook principal con todo el flujo del análisis y modelado.  
+- `telecomx_tratado.csv` → Archivo CSV con los datos ya tratados en la Parte 1 (entrada principal del análisis).  
+- `visualizaciones/` → Carpeta opcional para guardar gráficos relevantes (heatmaps, boxplots, scatterplots, matrices de confusión, etc.).  
+- `README.md` → Este documento con descripción completa del proyecto.  
 
 ---
 
-## 🤖 Modelos Implementados
-1. **Regresión Logística** *(con StandardScaler + class_weight="balanced")*  
-2. **KNN** *(con StandardScaler)*  
-3. **Árbol de Decisión** *(sin escalado, class_weight="balanced")*  
-4. **Random Forest** *(sin escalado, class_weight="balanced")*
+## 🔎 Preparación de Datos
+
+1. **Carga del dataset tratado** (`telecomx_tratado.csv`).  
+2. **Eliminación de columnas irrelevantes**: se descartaron identificadores como `customerID` y variables redundantes.  
+3. **Clasificación de variables**:
+   - **Categóricas**: `gender`, `InternetService`, `Contract`, `PaymentMethod`, `PaperlessBilling`, `MultipleLines`, entre otras.  
+   - **Numéricas**: `tenure`, `Monthly`, `Total`, `Cuentas_Diarias`, `SeniorCitizen`, etc.  
+4. **Codificación de variables categóricas**:  
+   - Se aplicó **OneHotEncoder** (con `drop="first"`) para transformar variables categóricas en variables numéricas binarias.  
+5. **Balanceo de clases**:  
+   - La proporción de churn fue de aproximadamente **73% “No” y 27% “Sí”**.  
+   - Se concluyó que no era un desbalance severo, por lo que no se aplicaron técnicas de oversampling/undersampling.  
+6. **Normalización / estandarización**:  
+   - Se aplicó **StandardScaler** únicamente en modelos sensibles a la escala (Regresión Logística y KNN).  
+   - No se utilizó en modelos de árboles (Decision Tree, Random Forest).  
+7. **Separación de datos**:  
+   - Train/Test con proporción **80/20**, manteniendo la proporción de clases (stratify).  
 
 ---
 
-## 📈 Resultados (Test)
-> Métricas sobre la clase positiva **(Churn = 1)**.
+## 📊 Análisis Exploratorio (EDA)
 
-| Modelo                | Accuracy | Precisión | Recall | F1   |
-|----------------------|:--------:|:---------:|:------:|:----:|
-| Regresión Logística  |  0.742   |   0.509   |  0.791 | 0.620|
-| KNN                  |  0.780   |   0.594   |  0.540 | 0.566|
-| Árbol de Decisión    |  0.735   |   0.500   |  0.786 | 0.611|
-| Random Forest        |  0.773   |   0.556   |  0.719 | 0.627|
+Durante la etapa de exploración se aplicaron diversas visualizaciones:
 
-**Lectura rápida**  
-- **Máximo recall (detectar churn):** Regresión Logística y Árbol (~0.79).  
-- **Equilibrio general (Prec/Rec/F1):** Random Forest.  
-- **KNN:** aceptable, pero el que menos recall obtiene.
+- **Heatmap de correlación**: identificamos variables con mayor relación con churn, como `InternetService_fiber optic`, `PaymentMethod_Electronic check`, `tenure` y `Contract_Two year`.  
+- **Boxplots y scatterplots**:  
+  - Clientes con **menor tiempo de permanencia (tenure bajo)** mostraron mayor tasa de cancelación.  
+  - Contratos de **dos años** presentaron la menor tasa de churn.  
+  - **Pagos electrónicos y facturación sin papel** estuvieron asociados a mayor cancelación.  
+- **Top 10 correlaciones con churn**: permitió visualizar qué variables aumentaban o reducían la probabilidad de cancelación.  
+
+Estos análisis dieron una base sólida para la construcción de modelos.
 
 ---
 
-## 🌟 Variables Más Influyentes
-Hallazgos consistentes entre modelos:
-- **Reducen churn**: **tenure** (antigüedad), **contratos de 1–2 años**, soporte/seguridad activos.
-- **Aumentan churn**: **Internet de fibra óptica**, **Electronic check**, **cargos mensuales altos**, menor gasto acumulado.
+## 🤖 Modelado Predictivo
+
+Se desarrollaron **cuatro modelos**:
+
+1. **Regresión Logística** (con escalado).  
+2. **KNN (K-Nearest Neighbors)** (con escalado).  
+3. **Árbol de Decisión** (sin escalado).  
+4. **Random Forest** (sin escalado).  
+
+Justificación:  
+- Modelos basados en distancia y optimización (Logística y KNN) requieren normalización.  
+- Modelos basados en árboles no requieren este paso.  
+- Se compararon modelos para encontrar el mejor equilibrio entre exactitud, precisión, recall y F1-score.
 
 ---
 
-## 📝 Conclusiones y Recomendaciones
-- Si el objetivo es **no perder clientes en riesgo** (maximizar recall), **Regresión Logística** y **Árbol** son convenientes.  
-- Si se busca **equilibrio** entre precisión y recall, **Random Forest** es la opción más estable.  
+## 📈 Resultados y Evaluación
 
-**Estrategias de retención sugeridas**:
-- Incentivar **contratos de mayor plazo** (descuentos/beneficios).
-- Acciones específicas para clientes con **fiber + electronic check** (ofertas, acompañamiento).
-- Revisar **estructura de precios** para clientes con **Monthly** alto.
-- Reforzar **soporte técnico** y servicios de valor (seguridad/backup).
+Métricas principales en el set de prueba:
+
+- **Regresión Logística**: buen recall para la clase churn (~0.79), útil para identificar clientes que podrían cancelar.  
+- **KNN**: desempeño balanceado, aunque menor recall que la regresión.  
+- **Árbol de Decisión**: resultados similares a la regresión logística, con cierta tendencia a overfitting.  
+- **Random Forest**: desempeño robusto, buen balance entre precisión y recall, aunque con ligera pérdida de generalización.  
+
+Se concluyó que **Logística y Random Forest** fueron los modelos más útiles para la empresa, dependiendo de si la prioridad es **maximizar recall** (detectar la mayor cantidad posible de clientes en riesgo) o **equilibrar precisión y recall** (minimizar falsos positivos).  
 
 ---
 
-## 🚀 Cómo clonar el repo:
-1. Clonar el repo:
+## 🌟 Principales Factores que Influyen en el Churn
+
+- **Aumentan el riesgo de cancelación**:  
+  - Internet de fibra óptica.  
+  - Método de pago: cheque electrónico.  
+  - Bajo tiempo de permanencia (tenure bajo).  
+  - Planes mensuales y facturación sin papel.  
+  - Altos gastos mensuales y totales.  
+
+- **Reducen el riesgo de cancelación**:  
+  - Contratos de 1 y 2 años.  
+  - Soporte técnico activo.  
+  - Seguridad online incluida.  
+  - Tener dependientes o pareja registrada.  
+
+---
+
+## 🚀 Instrucciones de Ejecución
+
+1. Clonar el repositorio:  
    ```bash
    git clone https://github.com/adcrx/TelecomChallenge2.git
    cd TelecomChallenge2
 
-👩‍💻 Autora:
+ ##  📌 Conclusión Final
 
-Proyecto desarrollado por **Alejandra Cotroneo** como parte del programa **Oracle Next Education (ONE) + Alura Latam**.
+El análisis permitió a Telecom X entender los principales motivos de la cancelación de clientes y predecir con buena precisión quiénes están en mayor riesgo.
+Esto abre la puerta a estrategias de retención personalizadas, enfocándose en clientes con contratos mensuales, facturación sin papel, pagos electrónicos y bajo tiempo de permanencia, que representan los segmentos más críticos para la empresa.
+
+## ✍️ Autora
+
+Este proyecto fue desarrollado por **Alejandra Cotroneo** como parte del programa **Oracle Next Education – Alura Latam.**
+
+Forma parte de la Parte 2 del Challenge de Machine Learning (Telecom X), enfocado en el análisis y predicción de churn de clientes.
